@@ -21,14 +21,14 @@ public class BeerController {
     @DeleteMapping(BEER_PATH_ID)
     Mono<ResponseEntity<Void>> deleteById(@PathVariable Integer beerId) {
         return beerService.deleteById(beerId)
-                .map(response -> ResponseEntity.noContent().build());
+                .thenReturn(ResponseEntity.noContent().build());
     }
 
     @PutMapping(BEER_PATH_ID)
     Mono<ResponseEntity<Void>> updateExistingBeer(@PathVariable("beerId") Integer beerId,
                                                   @Validated @RequestBody BeerDTO beerDTO) {
         return beerService.updateBeer(beerId, beerDTO)
-                .map(savedBeer -> ResponseEntity.ok().build());
+                .map(savedBeer -> ResponseEntity.noContent().build());
     }
 
     @PostMapping(BEER_PATH)
