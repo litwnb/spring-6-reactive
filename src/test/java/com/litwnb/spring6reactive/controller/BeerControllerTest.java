@@ -1,5 +1,6 @@
 package com.litwnb.spring6reactive.controller;
 
+import com.litwnb.spring6reactive.domain.Beer;
 import com.litwnb.spring6reactive.model.BeerDTO;
 import com.litwnb.spring6reactive.repository.BeerRepositoryTest;
 import org.junit.jupiter.api.MethodOrderer;
@@ -20,13 +21,20 @@ class BeerControllerTest {
     WebTestClient webTestClient;
 
     @Test
-    @Order(5)
+    @Order(6)
     void testDeleteBeer() {
         webTestClient.delete()
                 .uri(BeerController.BEER_PATH_ID, 1)
                 .exchange()
-                .expectStatus()
-                .isNoContent();
+                .expectStatus().isNoContent();
+    }
+
+    @Test
+    void testDeleteBeerNotFound() {
+        webTestClient.delete()
+                .uri(BeerController.BEER_PATH_ID, 999)
+                .exchange()
+                .expectStatus().isNotFound();
     }
 
     @Test
@@ -40,6 +48,26 @@ class BeerControllerTest {
 
     @Test
     @Order(4)
+    void testUpdateBeerBadRequest() {
+        Beer testBeer = BeerRepositoryTest.getTestBeer();
+        testBeer.setBeerStyle("");
+
+        webTestClient.put().uri(BeerController.BEER_PATH_ID, 1)
+                .body(Mono.just(testBeer), BeerDTO.class)
+                .exchange()
+                .expectStatus().isBadRequest();
+    }
+
+    @Test
+    void testUpdateBeerNotFound() {
+        webTestClient.put().uri(BeerController.BEER_PATH_ID, 999)
+                .body(Mono.just(BeerRepositoryTest.getTestBeer()), BeerDTO.class)
+                .exchange()
+                .expectStatus().isNotFound();
+    }
+
+    @Test
+    @Order(5)
     void testCreateBeer() {
         webTestClient.post().uri(BeerController.BEER_PATH)
                 .body(Mono.just(BeerRepositoryTest.getTestBeer()), BeerDTO.class)
@@ -50,6 +78,18 @@ class BeerControllerTest {
     }
 
     @Test
+    void testCreateBeerBadData() {
+        Beer testBeer = BeerRepositoryTest.getTestBeer();
+        testBeer.setBeerName("");
+
+        webTestClient.post().uri(BeerController.BEER_PATH)
+                .body(Mono.just(testBeer), BeerDTO.class)
+                .header("Content-type", "application/json")
+                .exchange()
+                .expectStatus().isBadRequest();
+    }
+
+    @Test
     @Order(1)
     void testGetById() {
         webTestClient.get().uri(BeerController.BEER_PATH_ID, 1)
@@ -57,6 +97,13 @@ class BeerControllerTest {
                 .expectStatus().isOk()
                 .expectHeader().valueEquals("Content-type", "application/json")
                 .expectBody(BeerDTO.class);
+    }
+
+    @Test
+    void testGetByIdNotFound() {
+        webTestClient.get().uri(BeerController.BEER_PATH_ID, 999)
+                .exchange()
+                .expectStatus().isNotFound();
     }
 
     @Test
