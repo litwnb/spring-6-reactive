@@ -15,7 +15,8 @@ public class SecurityConfig {
         httpSecurity.authorizeExchange(authorizeExchangeSpec ->
                         authorizeExchangeSpec.anyExchange().authenticated())
                 .oauth2ResourceServer(oAuth2ResourceServerSpec ->
-                        oAuth2ResourceServerSpec.jwt(Customizer.withDefaults()));
+                        oAuth2ResourceServerSpec.jwt(Customizer.withDefaults()))
+                .csrf(ServerHttpSecurity.CsrfSpec::disable);
 
         return httpSecurity.build();
     }
